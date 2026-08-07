@@ -1,10 +1,10 @@
 from pages.base_page import BasePage
 from locators.login_locators import LoginLocators
+from locators.constructor_locators import ConstructorLocators
 from urls import LOGIN_PAGE, HOME_PAGE
-import time
 from selenium.webdriver.support import expected_conditions as EC
 import allure
-
+from selenium.common.exceptions import ElementClickInterceptedException
 
 
 class LoginPage(BasePage):
@@ -25,12 +25,11 @@ class LoginPage(BasePage):
 
     @allure.step("Нажать кнопку «Войти»")
     def click_login(self):
-
-        time.sleep(0.3)
-        
-        self.click_element(
-            LoginLocators.LOGIN_BUTTON
-        )
+        try:
+            self.click_element(LoginLocators.LOGIN_BUTTON)
+        except ElementClickInterceptedException:
+            button = self.find_element(LoginLocators.LOGIN_BUTTON)
+            self.execute_script("arguments[0].click();", button)
 
 
     @allure.step("Авторизоваться")
@@ -39,9 +38,16 @@ class LoginPage(BasePage):
         self.enter_email(email)
         self.enter_password(password)
 
+        self.wait.until(
+            EC.element_to_be_clickable(LoginLocators.LOGIN_BUTTON)
+        )
+
         self.click_login()
-        self.wait_home_page_opened()
+        #self.wait_home_page_opened()
         
+        self.wait.until(
+            EC.visibility_of_element_located(ConstructorLocators.ORDER_BUTTON)
+        )
 
     @allure.step("Дождаться открытия главной страницы")
     def wait_home_page_opened(self):

@@ -112,8 +112,8 @@ class ConstructorPage(BasePage):
             self.click_element(ConstructorLocators.CLOSE_MODAL_BUTTON)
         except ElementClickInterceptedException:
             # Если не получилось — кликаюю через JS
-            close_button = self.driver.find_element(*ConstructorLocators.CLOSE_MODAL_BUTTON)
-            self.driver.execute_script("arguments[0].click();", close_button)
+            close_button = self.find_element(ConstructorLocators.CLOSE_MODAL_BUTTON)
+            self.execute_script("arguments[0].click();", close_button)
         
         self.wait.until(
             EC.invisibility_of_element_located(ConstructorLocators.ORDER_NUMBER)
