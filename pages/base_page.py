@@ -9,21 +9,26 @@ class BasePage:
         self.driver = driver
         self.wait = WebDriverWait(driver, 10)
 
+
     def find_element(self, locator):
         return self.wait.until(
             EC.visibility_of_element_located(locator)
         )
+
 
     def click_element(self, locator):
         self.wait.until(
             EC.element_to_be_clickable(locator)
         ).click()
 
+
     def get_text(self, locator):
         return self.find_element(locator).text
 
+
     def open(self, url):
         self.driver.get(url)
+
 
     def wait_loading_disappears(self):
         self.wait.until(
@@ -31,3 +36,7 @@ class BasePage:
                 HeaderLocators.MODAL_OVERLAY
             )
         )
+
+
+    def execute_script(self, script, *args):
+        return self.driver.execute_script(script, *args)

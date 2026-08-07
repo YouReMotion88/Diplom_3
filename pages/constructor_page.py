@@ -1,11 +1,15 @@
 from pages.base_page import BasePage
 from locators.constructor_locators import ConstructorLocators
+
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+import allure
+from selenium.common.exceptions import ElementClickInterceptedException
 
 
 class ConstructorPage(BasePage):
 
+    @allure.step("Кликнуть по ингредиенту")
     def click_ingredient(self):
         self.wait_loading_disappears()
 
@@ -13,16 +17,22 @@ class ConstructorPage(BasePage):
             ConstructorLocators.INGREDIENT
         )
 
+
+    @allure.step("Проверить, что модальное окно открыто")
     def is_modal_open(self):
         return self.find_element(
             ConstructorLocators.INGREDIENT_MODAL
         )
 
+
+    @allure.step("Закрыть модальное окно")
     def close_modal(self):
         self.click_element(
             ConstructorLocators.CLOSE_MODAL_BUTTON
         )
 
+
+    @allure.step("Проверить, что модальное окно закрыто")
     def is_modal_closed(self):
         return self.wait.until(
             EC.invisibility_of_element_located(
@@ -31,6 +41,7 @@ class ConstructorPage(BasePage):
         )
 
 
+    @allure.step("Получить значение счётчика ингредиента")
     def get_counter_value(self):
         return int(
             self.get_text(
@@ -39,6 +50,7 @@ class ConstructorPage(BasePage):
         )
 
 
+    @allure.step("Перетащить ингредиент в конструктор")
     def drag_ingredient_to_constructor(self):
         ingredient = self.find_element(
             ConstructorLocators.INGREDIENT
@@ -48,7 +60,7 @@ class ConstructorPage(BasePage):
             ConstructorLocators.CONSTRUCTOR_DROP_AREA
         )
 
-        self.driver.execute_script("""
+        self.execute_script("""
             function createEvent(typeOfEvent) {
                 var event = document.createEvent("CustomEvent");
                 event.initCustomEvent(typeOfEvent, true, true, null);
@@ -82,27 +94,33 @@ class ConstructorPage(BasePage):
 
         """, ingredient, constructor)
 
+        self.wait.until(
+            lambda driver: self.get_counter_value() == 2
+        )
 
+    @allure.step("Нажать кнопку «Оформить заказ»")
     def click_order_button(self):
         self.click_element(
             ConstructorLocators.ORDER_BUTTON
         )
 
 
-    def wait_order_number(self):
-        self.find_element(
-            ConstructorLocators.ORDER_NUMBER
-        )
-
-
+    @allure.step("Закрыть окно оформления заказа")
     def close_order_modal(self):
-        import time
-        time.sleep(1)
-        self.click_element(
-            ConstructorLocators.CLOSE_MODAL_BUTTON
+        # Сначала пробую обычный клик
+        try:
+            self.click_element(ConstructorLocators.CLOSE_MODAL_BUTTON)
+        except ElementClickInterceptedException:
+            # Если не получилось — кликаюю через JS
+            close_button = self.driver.find_element(*ConstructorLocators.CLOSE_MODAL_BUTTON)
+            self.driver.execute_script("arguments[0].click();", close_button)
+        
+        self.wait.until(
+            EC.invisibility_of_element_located(ConstructorLocators.ORDER_NUMBER)
         )
 
 
+    @allure.step("Получить номер заказа")
     def get_order_number(self):
         return int(
             self.get_text(
@@ -111,6 +129,7 @@ class ConstructorPage(BasePage):
         )
 
 
+    @allure.step("Дождаться отображения номера заказа")
     def wait_order_number(self):
         WebDriverWait(self.driver, 10).until(
             lambda driver: self.get_order_number() != 9999

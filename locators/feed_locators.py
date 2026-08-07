@@ -36,3 +36,9 @@ class FeedLocators:
         By.XPATH,
         "//a[p[text()='Конструктор']]"
     )
+
+   
+    FEED_TITLE = (
+        By.XPATH,
+        "//h1[contains(text(),'Лента заказов')]"
+    )

@@ -6,7 +6,6 @@ __pycache__/
 
 .pytest_cache/
 
-allure_results/
 allure-report/
 
 .vscode/
